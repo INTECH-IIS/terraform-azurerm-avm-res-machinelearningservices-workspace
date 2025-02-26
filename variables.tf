@@ -31,6 +31,29 @@ variable "ai_studio_hub_id" {
   }
 }
 
+variable "serverless_endpoints" {
+  type = map(object({
+    model_id            = string
+    name                = optional(string, null)
+    random_suffix       = optional(bool, true)
+    create_subscription = optional(bool, true)
+  }))
+  default     = {}
+  nullable    = false
+  description = <<DESCRIPTION
+A map of serverless endpoints to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+- `model_id` - The ID of the model to deploy.
+- `name` - (Optional) The name of the serverless endpoint. If not set, map key will be used.
+- `random_suffix` - (Optional) A flag indicating if a random suffix should be appended to the name. Defaults to `false`.
+- `create_subscription` - (Optional) A flag indicating if a marketplace subscription should be created. Defaults to `true`.
+DESCRIPTION
+
+  validation {
+    condition     = var.kind != "Hub" || (var.kind == "Hub" && length(var.serverless_endpoints) == 0)
+    error_message = "Serverless endpoints cannot be created for Hub resources."
+  }
+}
+
 variable "aiservices" {
   type = object({
     create_new                = optional(bool, false)

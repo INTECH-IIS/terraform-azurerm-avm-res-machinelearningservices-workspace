@@ -8,6 +8,19 @@ output "ai_services" {
   } : null
 }
 
+output "serverless_endpoints" {
+  description = "The serverless endpoints created."
+  value = {
+    for k, v in azapi_resource.serverless_endpoint : k => {
+      resource_id   = v.id
+      name          = v.name
+      endpoint      = v.output.properties.inferenceEndpoint.uri
+      primary_key   = sensitive(data.azapi_resource_action.serverless_endpoint_keys[k].output.primaryKey)
+      secondary_key = sensitive(data.azapi_resource_action.serverless_endpoint_keys[k].output.secondaryKey)
+    }
+  }
+}
+
 output "ai_services_service_connection" {
   description = "The service connection between the AIServices and the workspace, if created."
   value = var.aiservices.create_service_connection ? {
